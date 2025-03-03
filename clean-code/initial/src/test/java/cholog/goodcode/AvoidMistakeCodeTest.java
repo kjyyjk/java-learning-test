@@ -1,5 +1,6 @@
 package cholog.goodcode;
 
+import java.util.Collections;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -23,6 +24,21 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * 실수를 피하는 코드는 유지보수성을 높이고 버그를 줄이는데 도움을 줍니다.
  * 유지보수성과 확장성을 위한 실수를 방지하는 코드를 작성하는 방법을 알아봅니다.
  */
+
+/**
+ * 학습 후 정리
+ *
+ * 불변 객체를 사용해 불변성을 보장하면 -> 상태를 변경하는 실수를 방지할 수 있다. -> 유지보수에 좋다.
+ * 매번 불변 객체를 생성하는 것은 메모리 낭비일 수 있다 -> 캐싱을 사용할 수 있다 -> 자주 사용하는 값만 캐싱하면 메모리를 절감할 수 있다
+ * 무조건 불변객체가 좋은 것은 아니다. 상황에 따라 다르다. 특정 상태는 불변, 특정 상태는 가변으로 활용하면 불/가변의 이점을 모두 가질 수 있다.
+ * 캐싱을 적용하는 것도 결국 비용이 든다. 객체 그래프가 깊으면 복잡하다. 그리고 GC는 생각보다 성능이 좋다. 무조건 캐싱이 좋은 것은 아니다.
+ *
+ * 외부에서 받은 객체를 그대로 사용하거나 외부에게 내부 객체를 그대로 반환하는 것은 변경의 위험이 있다.
+ * 외부에서 받은 객체를 복사하여 사용하면 외부에서 변경해도 복사된 객체에는 영향이 없다 -> "방어적 복사"
+ * 외부에게 객체를 반환할 때 새로 복사하여 반환한다 -> "방어적 복사" -> 매번 반환할 때 마다 객체 생성 비용 발생
+ * 외부에게 객체를 반환할 때 불변 컬렉션을 반환한다 -> "불변 컬렉션"
+ * 입력 컬렉션 = 방어적 복사, 응답 컬렉션 = 불변 컬렉션이 보통 좋다.
+ */
 public class AvoidMistakeCodeTest {
     /**
      * 아래 코드는 최대 5까지만 움직이는 자동차를 구현한 코드입니다.
@@ -30,12 +46,16 @@ public class AvoidMistakeCodeTest {
      * 아래 코드는 원시값을 포장했지만 같은 위치 객체를 사용하며 의도와 다르게 동작하는 코드입니다.
      * 어떻게 같은 위치 객체를 사용할 때 발생할 수 있는 실수를 방지할 수 있을까?
      */
+    /**
+     * 값 별로 객체를 가진다? -> 불변 객체로 만든다.
+     */
     @Test
     @DisplayName("어떻게 같은 위치 객체를 사용할 때 발생할 수 있는 실수를 방지할 수 있을까?")
     void 어떻게_같은_위치_객체를_사용할_때_발생할_수_있는_실수를_방지할_수_있을까() {
         // TODO: 같은 위치 객체를 사용할 때 발생할 수 있는 실수를 방지할 수 있는 방법을 고민 후 개선해보세요.
         class Position {
-            private int value;
+            //            private int value;
+            private final int value;
 
             Position() {
                 this(0);
@@ -45,8 +65,12 @@ public class AvoidMistakeCodeTest {
                 this.value = value;
             }
 
-            public void increase() {
-                value++;
+//            public void increase() {
+//                value++;
+//            }
+
+            public Position increase() {
+                return new Position(value + 1);
             }
 
             @Override
@@ -67,17 +91,21 @@ public class AvoidMistakeCodeTest {
                 String name,
                 Position position
         ) {
-            public void forward() {
-                position.increase();
+            //            public void forward() {
+//                position.increase();
+//            }
+            public Car forward() {
+                return new Car(name, position.increase());
             }
         }
 
         final var position = new Position();
 
-        final var neoCar = new Car("네오", position);
+        var neoCar = new Car("네오", position);
         final var brownCar = new Car("브라운", position);
 
-        neoCar.forward();
+//        neoCar.forward();
+        neoCar = neoCar.forward();
 
         // Note: 네오의 자동차만 움직였기 때문에 브라운의 자동차는 움직이지 않아야 한다.
         assertThat(neoCar.position()).isEqualTo(new Position(1));
@@ -92,17 +120,34 @@ public class AvoidMistakeCodeTest {
      * <p>
      * 참고: <a href="https://en.wikipedia.org/wiki/Immutable_object">불변 객체</a>
      */
+    /**
+     * 어차피 불변 객체라면 예상 가능한 범위의 값의 객체들을 미리 생성하고.
+     * 꺼내쓰는 방식으로 하면 생성 비용을 아낄 수 있을 것이라고 생각한다. -> 캐싱
+     */
     @Test
     @DisplayName("불변 객체를 사용할 때 성능상의 이슈를 해결하는 방법은 무엇일까?")
     void 불변_객체를_사용할_때_성능상의_이슈를_해결하는_방법은_무엇일까() {
         // TODO: 불변 객체를 사용할 때 성능상의 이슈를 해결하는 방법을 고민 후 개선해보세요.
         record Position(int value) {
+            static Position[] positions;
+
+            static {
+                positions = new Position[100];
+                for (int i = 0; i < 100; i++) {
+                    positions[i] = new Position(i);
+                }
+            }
+
             Position() {
                 this(0);
             }
 
+            static Position of(final int value) {
+                return positions[value];
+            }
+
             public Position increase() {
-                return new Position(value + 1);
+                return of(value + 1);
             }
         }
 
@@ -133,6 +178,9 @@ public class AvoidMistakeCodeTest {
      * 하지만 지금의 방법은 캐싱되는 객체가 많을수록 메모리 사용량이 증가할 수 있습니다.
      * 메모리 사용량을 최소화하는 방법은 무엇일까?
      */
+    /**
+     * 모두 캐싱하지 않는다.
+     */
     @Test
     @DisplayName("메모리 사용량을 최소화하는 방법은 무엇일까?")
     void 메모리_사용량을_최소화하는_방법은_무엇일까() {
@@ -144,6 +192,10 @@ public class AvoidMistakeCodeTest {
                 return valueOf(0);
             }
 
+            /**
+             * Map에 있으면 반환.
+             * 없으면 람다를 기반으로 value를 만들어서 추가하고 반환
+             */
             public static Position valueOf(final int value) {
                 return CACHE.computeIfAbsent(value, Position::new);
             }
@@ -153,6 +205,10 @@ public class AvoidMistakeCodeTest {
             }
         }
 
+        /**
+         * 이렇게 했을 때 이점이 뭐다?
+         * -> 불변성 유지, 객체 생성 비용 절감
+         */
         record Car(
                 String name,
                 Position position
@@ -163,6 +219,9 @@ public class AvoidMistakeCodeTest {
                 return CACHE.computeIfAbsent(toKey(name, position), key -> new Car(key, position));
             }
 
+            /**
+             * Car객체의 두가지 상태를 하나의 키로 변환
+             */
             private static String toKey(final String name, final Position position) {
                 return name + position.value();
             }
@@ -352,8 +411,13 @@ public class AvoidMistakeCodeTest {
         class RacingGame {
             private final List<Car> participants;
 
+            /**
+             * 새로운 arrayList를 생성하면 되지 않을까?
+             * this.participants = new ArrayList<>(participants);
+             */
             RacingGame(final List<Car> participants) {
-                this.participants = participants;
+//                this.participants = participants;
+                this.participants = new ArrayList<>(participants);
             }
 
             public List<Car> selectWinners() {
@@ -373,8 +437,12 @@ public class AvoidMistakeCodeTest {
                         .toList();
             }
 
+            /**
+             * Unmodifiable을 반환하자
+             */
             List<Car> getParticipants() {
-                return participants;
+//                return participants;
+                return Collections.unmodifiableList(participants);
             }
         }
 
@@ -387,8 +455,11 @@ public class AvoidMistakeCodeTest {
         assertThat(winners).containsExactly(brownCar);
 
         // Note: 외부에서 조작할 수 있는 위험이 존재하고 있다.
-        participants.add(new Car("브리", new Position(2)));
-        racingGame.getParticipants().add(new Car("솔라", new Position(3)));
+        /**
+         * UnmodifiableList를 반환하도록 개선했으므로 외부에서 add를 하면 예외가 발생한다.
+         */
+//        participants.add(new Car("브리", new Position(2)));
+//        racingGame.getParticipants().add(new Car("솔라", new Position(3)));
         assertThat(winners).containsExactly(brownCar);
         assertThat(racingGame.getParticipants()).containsExactlyElementsOf(List.of(neoCar, brownCar));
     }
@@ -467,9 +538,14 @@ public class AvoidMistakeCodeTest {
                         .toList();
             }
 
+            /**
+             * 이미 위에서 내가 개선한 것처럼
+             * UnmodifableList를 반환하면 객체의 상태를 변경하지 못하면서 생성 비용도 절감할 수 있다.
+             */
             List<Car> getParticipants() {
                 // Note: 매번 새로운 리스트를 생성하여 성능상의 이슈가 발생할 수 있다.
-                return new ArrayList<>(participants);
+//                return new ArrayList<>(participants);
+                return Collections.unmodifiableList(participants);
             }
         }
 
@@ -482,7 +558,7 @@ public class AvoidMistakeCodeTest {
         assertThat(winners).containsExactly(brownCar);
 
         participants.add(new Car("브리", new Position(2)));
-        racingGame.getParticipants().add(new Car("솔라", new Position(3)));
+//        racingGame.getParticipants().add(new Car("솔라", new Position(3)));
         assertThat(winners).containsExactly(brownCar);
         assertThat(racingGame.getParticipants()).containsExactlyElementsOf(List.of(neoCar, brownCar));
     }
@@ -492,6 +568,10 @@ public class AvoidMistakeCodeTest {
      * 응답하는 컬렉션을 불변 컬렉션으로 만들어 객체의 상태를 변경할 수 있는 위험을 방지할 수 있습니다.
      * 입력을 받는 컬렉션을 불변 컬렉션을 만드는 것은 그대로 외부에서 조작할 수 있는 위험이 존재합니다.
      * 따라서 입력받는 컬렉션은 방어적 복사로, 응답하는 컬렉션은 불변 컬렉션으로 만드는 것이 좋습니다.
+     */
+    /**
+     * 입력 시 복사 -> 방어적 복사
+     * 반환할 때 Unmodifable -> 불변 컬렉션 반환
      */
     @Test
     @DisplayName("입력을 받는 컬렉션은 방어적 복사로, 응답하는 컬렉션은 불변 컬렉션으로 만드는 것이 좋다.")
