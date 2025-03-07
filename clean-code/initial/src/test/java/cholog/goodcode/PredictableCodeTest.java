@@ -19,6 +19,24 @@ import static org.junit.jupiter.api.Assertions.assertAll;
  * 예측 가능한 코드는 유지보수성을 높이고 버그를 줄이는데 도움을 줍니다.
  * 유지보수성과 확장성을 위한 예측 가능한 코드를 작성하는 방법을 알아봅니다.
  */
+
+/**
+ * 학습 후 정리
+ *
+ * 반환타입 null을 사용하면 null 참조 예외등 사이드 이펙트가 발생할 수 있다.
+ * optional을 사용하여 해결할 수 있다.
+ * optional을 사용하면 외부에서 처리해야하므로 외부에 책임을 떠넘기는 것과 같다.
+ * 도메인 핵심부에서 예외를 던지면 외부에서 잡기만 하면 된다.
+ * optional, 예외 중 하나만 정답이 아니라 각 쓰임이 적절한 경우가 있다.
+ *
+ * 어느 경우에 예외 발생을 할 지는 개발자의 의도에 따라 달렸다.
+ *
+ * 명령 같은 것을 String으로 다루면 컴파일 시점에 체크가 안되기 때무에 타입 안정성이 불안정하다.
+ * Enum 열거형 상수로 사용한다면 컴파일 에러를 확인해 타입 안정성을 확보할 수 있다.
+ * enum switch문을 사용하면 처리하지 않은 값에 대해 컴파일 에러를 확인할 수가 있어, if문 보다 안정적이다.
+ * 아니면 enum 안에 행위를 넣어 객체로써 다룰 수 있다.
+ * enum을 객체로써 다루는게 좋을 때도 있고, 그저 상수로써 다루는게 적절할 때가 있다.
+ */
 public class PredictableCodeTest {
     record Car(int position) {
     }
@@ -45,12 +63,20 @@ public class PredictableCodeTest {
                 this.participants = participants;
             }
 
-            int averagePosition() {
-                // Note: 매직값은 버그를 유발할 수 있다.
-                return (int) participants.stream()
+//            int averagePosition() {
+            Integer averagePosition() {
+//                // Note: 매직값은 버그를 유발할 수 있다.
+//                return (int) participants.stream()
+//                        .mapToInt(Car::position)
+//                        .average()
+//                        .orElse(NO_PARTICIPANT);
+                OptionalDouble average = participants.stream()
                         .mapToInt(Car::position)
-                        .average()
-                        .orElse(NO_PARTICIPANT);
+                        .average();
+                if (participants.isEmpty()) {
+                    return null;
+                }
+                return (int) average.getAsDouble();
             }
         }
 
@@ -58,7 +84,8 @@ public class PredictableCodeTest {
 
         final var averagePosition = racingGame.averagePosition();
 
-        assertThat(averagePosition).isEqualTo(RacingGame.NO_PARTICIPANT);
+//        assertThat(averagePosition).isEqualTo(RacingGame.NO_PARTICIPANT);
+        assertThat(averagePosition).isNull();
     }
 
     /**
@@ -82,16 +109,28 @@ public class PredictableCodeTest {
                 this.participants = participants;
             }
 
-            Integer averagePosition() {
+//            Integer averagePosition() {
+//                final OptionalDouble average = participants.stream()
+//                        .mapToInt(Car::position)
+//                        .average();
+//
+//                if (average.isEmpty()) {
+//                    // Note: null은 버그를 유발할 수 있다.
+//                    return null;
+//                }
+//                return (int) average.getAsDouble();
+//            }
+
+            Optional<Integer> averagePosition() {
                 final OptionalDouble average = participants.stream()
                         .mapToInt(Car::position)
                         .average();
 
                 if (average.isEmpty()) {
-                    // Note: null은 버그를 유발할 수 있다.
-                    return null;
+                    return Optional.empty();
                 }
-                return (int) average.getAsDouble();
+
+                return Optional.of((int) average.getAsDouble());
             }
         }
 
@@ -125,23 +164,32 @@ public class PredictableCodeTest {
             }
 
             // Note: Optional를 사용하면 외부에 처리를 위임하게 되고, 응집도가 떨어질 수 있다.
-            Optional<Integer> averagePosition() {
-                final OptionalDouble average = participants.stream()
-                        .mapToInt(Car::position)
-                        .average();
+//            Optional<Integer> averagePosition() {
+//                final OptionalDouble average = participants.stream()
+//                        .mapToInt(Car::position)
+//                        .average();
+//
+//                if (average.isEmpty()) {
+//                    return Optional.empty();
+//                }
+//                return Optional.of((int) average.getAsDouble());
+//            }
 
-                if (average.isEmpty()) {
-                    return Optional.empty();
-                }
-                return Optional.of((int) average.getAsDouble());
+            int averagePosition() {
+                return (int) participants.stream()
+                        .mapToInt(Car::position)
+                        .average()
+                        .orElseThrow(() -> new IllegalArgumentException("참여자가 없습니다."));
             }
         }
 
         final var racingGame = new RacingGame();
 
-        final var averagePosition = racingGame.averagePosition();
-
-        assertThat(averagePosition).isEmpty();
+//        final var averagePosition = racingGame.averagePosition();
+//        assertThat(averagePosition).isEmpty();
+        assertThatThrownBy(() -> racingGame.averagePosition())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("참여자가 없습니다.");
     }
 
     /**
@@ -190,6 +238,11 @@ public class PredictableCodeTest {
      * 자동차의 위치를 조회하는 것 또한 해당 메서드를 통해 조회하고 있습니다.
      * 자동차 이동과 조회를 같이 할 경우 어떠한 문제가 있을지 고민 후 개선해보세요.
      */
+
+    /**
+     * 이동과 조회를 같이할 경우 한 가지 로직이 변경되면 다른 로직의 코드도 영향을 받는다?
+     * 다른 사람이 봤을 때 반환 값이 무엇인지 파악하기 힘들다?
+     */
     @Test
     @DisplayName("자동차 이동과 조회를 같이 할 경우 어떠한 문제가 있을지 고민 후 개선한다.")
     void 자동차_이동과_조회를_같이_할_경우_어떠한_문제가_있을지_고민_후_개선한다() {
@@ -197,18 +250,29 @@ public class PredictableCodeTest {
             private int position;
 
             // TODO: 자동차 이동과 조회를 같이 할 경우 어떠한 문제가 있을지 고민 후 개선해보세요.
-            int move(final int power) {
-                if (power <= 4) {
-                    return position;
+//            int move(final int power) {
+//                if (power <= 4) {
+//                    return position;
+//                }
+//
+//                return ++position;
+//            }
+            void move(final int power) {
+                if (power > 4) {
+                    position++;
                 }
+            }
 
-                return ++position;
+            int getPosition() {
+                return position;
             }
         }
 
         final var car = new Car();
 
-        final var position = car.move(5);
+//        final var position = car.move(5);
+        car.move(5);
+        final var position = car.getPosition();
 
         assertThat(position).isEqualTo(1);
     }
@@ -217,6 +281,12 @@ public class PredictableCodeTest {
      * 아래 코드는 자동차가 최대 5칸을 움직일 수 있는 코드입니다.
      * 5칸에 위치하였을 때 더 이동하려고 하면 더 이상 움직이지 않고 위치를 유지하고 있습니다.
      * 아래 자동차가 최대 위치에서 움직이지 않고 유지하는 코드는 어떠한 문제가 있을지 고민 후 개선해보세요.
+     */
+
+    /**
+     * 모르겠는뎁쇼
+     * 이게 왜 문제일까?
+     * 내부 상태인 position으로 인해 움직이지 않았는데 외부에선 그걸 모르니까?
      */
     @Test
     @DisplayName("자동차가 최대 위치에서 움직이지 않고 유지하는 코드는 어떠한 문제가 있을지 고민 후 개선한다.")
@@ -233,8 +303,11 @@ public class PredictableCodeTest {
                 if (power <= 4) {
                     return;
                 }
+//                if (position >= 5) {
+//                    return;
+//                }
                 if (position >= 5) {
-                    return;
+                    throw new IllegalStateException("안움직임");
                 }
 
                 position++;
@@ -247,7 +320,9 @@ public class PredictableCodeTest {
 
         final var car = new Car(5);
 
-        car.move(5);
+        assertThatThrownBy(() -> car.move(5))
+                .isInstanceOf(IllegalStateException.class)
+                        .hasMessage("안움직임");
 
         assertThat(car.getPosition()).isEqualTo(5);
     }
@@ -257,6 +332,22 @@ public class PredictableCodeTest {
      * 중요한 동작을 무시하는 것은 버그를 유발할 수 있습니다.
      * 하지만 아직 파워가 4보다 작을 때는 무시하고 있습니다.
      * 파워가 4보다 작을 때 무시하는 코드는 어떠한 문제가 있을지 고민 후 개선해보세요.
+     */
+
+    /**
+     * 외부에서는 무시된걸 모른다?
+     * 그러면 어떻게 해야할까.
+     * 1. 메서드 명을 수정한다. 특정 조건 시 움직이지 않는 다는 것을.
+     * 2. 움직인 여부를 반환한다.
+     * 3. 움직이지 않을 경우 예외를 던진다.
+     *
+     * 3을 사용하자
+     */
+
+    /**
+     * 네오의 경우 파워가 4보다 작거나 같으면 그냥 return 한다고 한다.
+     * 왜? 개발자의 의도니까.
+     * 근데 애매하다. 그렇게 따지면 position에 따라 움직이지 않는 것 또한 개발자의 의도 아닌가?
      */
     @Test
     @DisplayName("파워가 4보다 작을 때 무시하는 코드는 어떠한 문제가 있을지 고민 후 개선한다.")
@@ -293,6 +384,10 @@ public class PredictableCodeTest {
     /**
      * 아래 코드는 입력된 문자열 명령에 따라 동작하는 코드입니다.
      * 문자열로 명령을 받는 것은 어떠한 문제가 있을지 고민 후 개선해보세요.
+     */
+
+    /**
+     * PLUS, MINUS 외의 것이 들어와도 컴파일 시점에 확인이 안된다.
      */
     @Test
     @DisplayName("문자열로 명령을 받는 것은 어떠한 문제가 있을지 고민 후 개선한다.")
@@ -413,13 +508,29 @@ public class PredictableCodeTest {
      * 놓친 코드를 찾는 시점을 런타임이 아닌 컴파일 타임으로 변경하여 해당 명령을 처리하는 코드를 놓치지 않을 수 있습니다.
      * 코드를 작성할 때 최대한 런타임 시점에 발생할 수 있는 오류를 컴파일 타임으로 발생하도록 작성하는 것이 좋습니다.
      */
+    /**
+     * Enum switch의 경우 누락되면 컴파일 에러가 난다..!
+     */
     @Test
     @DisplayName("코드를 작성할 때 최대한 런타임 시점에 발생할 수 있는 오류를 컴파일 타임으로 발생하도록 작성하는 것이 좋다.")
     void 코드를_작성할_때_최대한_런타임_시점에_발생할_수_있는_오류를_컴파일_타임으로_발생하도록_작성하는_것이_좋다() {
         enum Command {
-            PLUS,
-            MINUS,
-            MULTIPLY
+//            PLUS,
+//            MINUS,
+//            MULTIPLY
+            PLUS((left, right) -> left + right),
+            MINUS((left, right) -> left - right),
+            MULTIPLY((left, right) -> left * right);
+
+            private final BiFunction<Integer, Integer, Integer> function;
+
+            Command(BiFunction<Integer, Integer, Integer> function) {
+                this.function = function;
+            }
+
+            public int doo(int left, int right) {
+                return function.apply(left, right);
+            }
         }
 
         class Calculator {
@@ -428,11 +539,12 @@ public class PredictableCodeTest {
                     final int left,
                     final int right
             ) {
-                return switch (command) {
-                    case PLUS -> left + right;
-                    case MINUS -> left - right;
-                    case MULTIPLY -> left * right; // Note: 모든 열것값을 처리하지 않으면 컴파일 오류가 발생한다.
-                };
+//                return switch (command) {
+//                    case PLUS -> left + right;
+//                    case MINUS -> left - right;
+//                    case MULTIPLY -> left * right; // Note: 모든 열것값을 처리하지 않으면 컴파일 오류가 발생한다.
+//                };
+                return command.doo(left, right);
             }
         }
 
@@ -448,6 +560,12 @@ public class PredictableCodeTest {
      * 이러한 방법은 열거형에 역할을 부여하여 열거형이 해당 역할을 수행하도록 하는 방법입니다.
      * 지금과 같이 간단한 코드에선 더욱 응집도가 높은 코드가 될 수 있지만, 열거형을 상수와 객체 역할을 모두 수행하도록 하는 것은 적절하지 않을 수 있습니다.
      * 열거형이 해당 역할을 수행하도록 하는 것이 적합한지 충분한 고민을 하고 사용해야 합니다.
+     */
+
+    /**
+     * BiFunction은 3가지 제네릭 타입을 가진다.
+     * 순서대로 첫번째 인자의 타입, 두번째 인자의 타입, 반환값의 타입
+     *
      */
     @Test
     @DisplayName("열거형이 해당 역할을 수행하도록 하는 것이 적합한지 충분한 고민을 하고 사용해야 합니다.")
