@@ -36,64 +36,16 @@ public class ReadableCodeTest {
     void 어떻게_의도를_전달할_수_있을까() {
         // TODO: 자동차를 움직이고 위치가 변경된다는 의도를 드러낼 수 있는 코드를 작성해보세요.
         class Car {
-            private int p = 0;
-
-            void forward() {
-                if (p > 5) {
-                    throw new IllegalStateException("최대 5까지만 움직일 수 있습니다.");
-                }
-
-                p += 1;
-            }
-        }
-
-        final var car = new Car();
-
-        car.forward();
-        assertThat(car.p).isEqualTo(1);
-    }
-
-    /**
-     * 주석을 사용하여 의도를 전달하는 방법입니다.
-     * 하지만 주석을 신경쓰지 않고 코드를 변경하거나, 처음부터 주석과 다른 코드를 작성했다면 오히려 오해할 수 있는 코드가 될 수 있습니다.
-     * 주석을 사용하지 않고도 의도를 전달할 수 있는 방법은 없을까?
-     */
-    @Test
-    @DisplayName("주석을 사용하지 않고도 의도를 전달할 수 있는 방법은 없을까?")
-    void 주석을_사용하지_않고도_의도를_전달할_수_있는_방법은_없을까() {
-        // TODO: 자동차를 움직이고 위치가 변경된다는 의도를 드러낼 수 있는 코드를 작성해보세요.
-        class Car {
-            // 자동차 위치
-            private int p = 0;
-
-            void forward() {
-                if (p > 5) {
-                    throw new IllegalStateException("최대 5까지만 움직일 수 있습니다.");
-                }
-
-                p += 1;
-            }
-        }
-
-        final var car = new Car();
-
-        car.forward();
-        assertThat(car.p).isEqualTo(1);
-    }
-
-    /**
-     * 주석을 사용하지 않고 의미있는 이름을 통해 의도를 전달하는 방법입니다.
-     * 의미있는 이름을 사용하면 코드를 읽는 사람이 코드의 의도를 파악하기 쉬워집니다.
-     * 또한 코드로 관리되기 때문에 코드 변경 시 주석을 신경쓰지 않아도 됩니다.
-     * 지금의 position은 이름을 통해 의도를 전달하고 있지만, 최대 5까지만 움직인다는 사실은 동작을 통해 알 수 있습니다.
-     * 코드를 통해 객체의 역할을 명확하게 드러내는 방법은 없을까?
-     */
-    @Test
-    @DisplayName("코드를 통해 객체의 역할을 명확하게 드러내는 방법은 없을까")
-    void 코드를_통해_객체의_역할을_명확하게_드러내는_방법은_없을까() {
-        // TODO: 객체의 역할을 명확하게 드러내는 코드를 작성해보세요.
-        class Car {
-            private int position;
+//            private int p = 0;
+//
+//            void forward() {
+//                if (p > 5) {
+//                    throw new IllegalStateException("최대 5까지만 움직일 수 있습니다.");
+//                }
+//
+//                p += 1;
+//            }
+            private int position = 0;
 
             void forward() {
                 if (position > 5) {
@@ -108,6 +60,116 @@ public class ReadableCodeTest {
 
         car.forward();
         assertThat(car.position).isEqualTo(1);
+    }
+
+    /**
+     * 주석을 사용하여 의도를 전달하는 방법입니다.
+     * 하지만 주석을 신경쓰지 않고 코드를 변경하거나, 처음부터 주석과 다른 코드를 작성했다면 오히려 오해할 수 있는 코드가 될 수 있습니다.
+     * 주석을 사용하지 않고도 의도를 전달할 수 있는 방법은 없을까?
+     */
+    @Test
+    @DisplayName("주석을 사용하지 않고도 의도를 전달할 수 있는 방법은 없을까?")
+    void 주석을_사용하지_않고도_의도를_전달할_수_있는_방법은_없을까() {
+        // TODO: 자동차를 움직이고 위치가 변경된다는 의도를 드러낼 수 있는 코드를 작성해보세요.
+        class Car {
+            // 자동차 위치
+//            private int p = 0;
+//
+//            void forward() {
+//                if (p > 5) {
+//                    throw new IllegalStateException("최대 5까지만 움직일 수 있습니다.");
+//                }
+//
+//                p += 1;
+//            }
+
+            private int position = 0;
+
+            void forward() {
+                if (position > 5) {
+                    throw new IllegalStateException("최대 5까지만 움직일 수 있습니다.");
+                }
+
+                position += 1;
+            }
+        }
+
+        final var car = new Car();
+
+        car.forward();
+//        assertThat(car.p).isEqualTo(1);
+        assertThat(car.position).isEqualTo(1);
+    }
+
+    /**
+     * 주석을 사용하지 않고 의미있는 이름을 통해 의도를 전달하는 방법입니다.
+     * 의미있는 이름을 사용하면 코드를 읽는 사람이 코드의 의도를 파악하기 쉬워집니다.
+     * 또한 코드로 관리되기 때문에 코드 변경 시 주석을 신경쓰지 않아도 됩니다.
+     * 지금의 position은 이름을 통해 의도를 전달하고 있지만, 최대 5까지만 움직인다는 사실은 동작을 통해 알 수 있습니다.
+     * 코드를 통해 객체의 역할을 명확하게 드러내는 방법은 없을까?
+     */
+    @Test
+    @DisplayName("코드를 통해 객체의 역할을 명확하게 드러내는 방법은 없을까")
+    void 코드를_통해_객체의_역할을_명확하게_드러내는_방법은_없을까() {
+        // TODO: 객체의 역할을 명확하게 드러내는 코드를 작성해보세요.
+        class Position {
+            private final int position;
+
+            public Position(final int position) {
+                this.position = position;
+            }
+
+            public Position forward() {
+                if (position > 5) {
+                    throw new IllegalStateException("최대 5까지만 움직일 수 있습니다.");
+                }
+
+                return new Position(position + 1);
+            }
+
+            @Override
+            public boolean equals(Object object) {
+                if (object == null || getClass() != object.getClass()) {
+                    return false;
+                }
+                Position position1 = (Position) object;
+                return position == position1.position;
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hashCode(position);
+            }
+        }
+
+        class Car {
+//            private int position;
+//
+//            void forward() {
+//                if (position > 5) {
+//                    throw new IllegalStateException("최대 5까지만 움직일 수 있습니다.");
+//                }
+//
+//                position += 1;
+//            }
+
+            private Position position;
+
+            public Car(final Position position) {
+                this.position = position;
+            }
+
+            void forward() {
+                position = position.forward();
+            }
+        }
+
+        final var car = new Car(new Position(0));
+
+//        car.forward();
+//        assertThat(car.position).isEqualTo(1);
+        car.forward();
+        assertThat(car.position).isEqualTo(new Position(1));
     }
 
     /**
@@ -179,30 +241,48 @@ public class ReadableCodeTest {
             private String name;
             private int position;
 
-            public String getName()
-            {
+//            public String getName()
+//            {
+//                return name;
+//            }
+//
+//            void Forward()  {
+//                position += 1;
+//            }
+//
+//            public int position() {
+//                return position;
+//            }
+//
+//            void minusPosition()
+//            {
+//                position--;
+//            }
+
+            public void forward() {
+                position++;
+            }
+
+            public void backward() {
+                position--;
+            }
+
+            public String getName() {
                 return name;
             }
 
-            void Forward()  {
-                position += 1;
-            }
-
-            public int position() {
+            public int getPosition() {
                 return position;
-            }
-
-            void minusPosition()
-            {
-                position--;
             }
         }
         // @formatter:on
 
         final var car = new Car();
 
-        car.Forward();
-        assertThat(car.position()).isEqualTo(1);
+//        car.Forward();
+//        assertThat(car.position()).isEqualTo(1);
+        car.forward();
+        assertThat(car.getPosition()).isEqualTo(1);
     }
 
     /**
@@ -255,23 +335,61 @@ public class ReadableCodeTest {
                     final List<Integer> numbers,
                     final List<Integer> winningNumbers
             ) {
-                for (int number : numbers) {
-                    if (number < 1 || number > 45) {
-                        throw new IllegalArgumentException("로또 번호는 1부터 45까지의 숫자여야 합니다.");
-                    }
-                }
-                for (int winningNumber : winningNumbers) {
-                    if (winningNumber < 1 || winningNumber > 45) {
-                        throw new IllegalArgumentException("로또 번호는 1부터 45까지의 숫자여야 합니다.");
-                    }
-                }
-                if (new HashSet<>(numbers).size() != 6) {
-                    throw new IllegalArgumentException("로또 번호는 6개여야 합니다.");
-                }
-                if (new HashSet<>(winningNumbers).size() != 6) {
-                    throw new IllegalArgumentException("로또 번호는 6개여야 합니다.");
-                }
+//                for (int number : numbers) {
+//                    if (number < 1 || number > 45) {
+//                        throw new IllegalArgumentException("로또 번호는 1부터 45까지의 숫자여야 합니다.");
+//                    }
+//                }
+//                for (int winningNumber : winningNumbers) {
+//                    if (winningNumber < 1 || winningNumber > 45) {
+//                        throw new IllegalArgumentException("로또 번호는 1부터 45까지의 숫자여야 합니다.");
+//                    }
+//                }
+//                if (new HashSet<>(numbers).size() != 6) {
+//                    throw new IllegalArgumentException("로또 번호는 6개여야 합니다.");
+//                }
+//                if (new HashSet<>(winningNumbers).size() != 6) {
+//                    throw new IllegalArgumentException("로또 번호는 6개여야 합니다.");
+//                }
+//
+//                int count = 0;
+//                for (int number : numbers) {
+//                    for (int winningNumber : winningNumbers) {
+//                        if (number == winningNumber) {
+//                            count++;
+//                        }
+//                    }
+//                }
+//
+//                return switch (count) {
+//                    case 6 -> 1_000_000_000;
+//                    case 5 -> 50_000_000;
+//                    case 4 -> 500_000;
+//                    case 3 -> 5_000;
+//                    default -> 0;
+//                };
+                validateNumbers(numbers);
+                validateNumbers(winningNumbers);
+                int count = countMatchNumbers(numbers, winningNumbers);
+                return getWinningAmount(count);
+            }
 
+            private void validateNumbers(List<Integer> numbers) {
+                validateLottoNumberRange(numbers);
+                validateLottoSize(numbers);
+            }
+
+            private static int getWinningAmount(int count) {
+                return switch (count) {
+                    case 6 -> 1_000_000_000;
+                    case 5 -> 50_000_000;
+                    case 4 -> 500_000;
+                    case 3 -> 5_000;
+                    default -> 0;
+                };
+            }
+
+            private static int countMatchNumbers(List<Integer> numbers, List<Integer> winningNumbers) {
                 int count = 0;
                 for (int number : numbers) {
                     for (int winningNumber : winningNumbers) {
@@ -280,14 +398,21 @@ public class ReadableCodeTest {
                         }
                     }
                 }
+                return count;
+            }
 
-                return switch (count) {
-                    case 6 -> 1_000_000_000;
-                    case 5 -> 50_000_000;
-                    case 4 -> 500_000;
-                    case 3 -> 5_000;
-                    default -> 0;
-                };
+            private static void validateLottoSize(List<Integer> numbers) {
+                if (new HashSet<>(numbers).size() != 6) {
+                    throw new IllegalArgumentException("로또 번호는 6개여야 합니다.");
+                }
+            }
+
+            private static void validateLottoNumberRange(List<Integer> numbers) {
+                for (int number : numbers) {
+                    if (number < 1 || number > 45) {
+                        throw new IllegalArgumentException("로또 번호는 1부터 45까지의 숫자여야 합니다.");
+                    }
+                }
             }
         }
 
@@ -313,6 +438,9 @@ public class ReadableCodeTest {
     @DisplayName("어떻게 추상화하여 객체의 역할을 명확하게 드러낼 수 있을까?")
     void 어떻게_추상화하여_객체의_역할을_명확하게_드러낼_수_있을까() {
         // TODO: 역할을 적절히 추상화하여 클래스를 작게 만들어보세요. 시작점 메서드의 시그니처는 변경하지 않습니다.
+        /**
+         * LottoNumber와 Lotto로 감싸면 된다.
+         */
         class LottoGame {
             int calculatePrize(
                     final List<Integer> numbers,
@@ -508,6 +636,9 @@ public class ReadableCodeTest {
     @DisplayName("어떻게 매개변수의 의미를 전달할 수 있을까?")
     void 어떻게_매개변수의_의미를_전달할_수_있을까() {
         // TODO: Crew 클래스를 확인하지 않고 매개변수의 의미를 전달할 수 있는 코드를 작성해보세요.
+        /**
+         * ctrl p 로 확인 가능하긴 한데.. 우선 주석 활용.
+         */
         final var crew = new Crew(
                 "Neo",
                 Set.of("쌈밥", "김치찌개", "탕수육", "비빔밥"),
@@ -521,6 +652,9 @@ public class ReadableCodeTest {
      * 주석으로 매개변수의 의미를 전달할 수 있는 코드입니다.
      * 하지만 주석을 신경쓰지 않고 코드를 변경하거나, 처음부터 주석과 다른 코드를 작성했다면 오히려 오해할 수 있는 코드가 될 수 있습니다.
      * 주석을 사용하지 않고 매개변수의 의미를 전달할 수 있는 방법은 없을까?
+     */
+    /**
+     * 아 빌더를 사용하면 명확하다.
      */
     @Test
     @DisplayName("주석을 사용하지 않고 매개변수의 의미를 전달할 수 있는 방법은 없을까?")
@@ -548,6 +682,11 @@ public class ReadableCodeTest {
      * 빌더를 사용하면 매개변수의 의미를 전달할 수 있고, 빌더를 통해 객체를 생성할 때 매개변수의 순서를 신경쓰지 않아도 됩니다.
      * 매개변수가 많아지면 어떤 값을 설정했는지 확인이 어렵거나 어떤 매개변수끼리 의미가 있는지 확인이 어려워질 수 있습니다.
      * 매개변수를 묶어 의미를 전달할 수 있는 방법은 없을까?
+     */
+    /**
+     * 빌더는 항상 애노테이션으로만 사용해왔었는데
+     * 이런식으로 매 필드에 관한 메서드마다 필드값 설정을 하고 자신을 반환하면
+     * 메서드 체인 형식으로 생성할 수 있다.
      */
     @Test
     @DisplayName("매개변수를 묶어 의미를 전달할 수 있는 방법은 없을까?")
@@ -686,12 +825,16 @@ public class ReadableCodeTest {
 
             public Menu(final List<String> menuItems) {
                 // TODO: Collection API를 사용하여 코드를 재사용하고 의도를 파악하기 쉽게 만들어보세요.
-                for (int i = 0; i < menuItems.size(); i++) {
-                    for (int j = 0; j < i; j++) {
-                        if (menuItems.get(i).equals(menuItems.get(j))) {
-                            throw new IllegalArgumentException("중복된 메뉴가 있습니다.");
-                        }
-                    }
+//                for (int i = 0; i < menuItems.size(); i++) {
+//                    for (int j = 0; j < i; j++) {
+//                        if (menuItems.get(i).equals(menuItems.get(j))) {
+//                            throw new IllegalArgumentException("중복된 메뉴가 있습니다.");
+//                        }
+//                    }
+//                }
+
+                if (menuItems.size() != (int) menuItems.stream().distinct().count()) {
+                    throw new IllegalArgumentException("중복된 메뉴가 있습니다.");
                 }
 
                 this.menuItems = menuItems;
@@ -709,25 +852,37 @@ public class ReadableCodeTest {
      * 위 객체 분리에서 학습한 것처럼 메서드로 나타내는 것 보다 객체 자체로 나타내는 것이 더 좋은 방법일 수 있습니다.
      * 객체 자체로 의미를 전달할 수 있는 방법은 없을까?
      */
+
+    /**
+     * 중복을 허용하지 않을 것이라면 set으로 사용한다?
+     */
     @Test
     @DisplayName("객체 자체로 의미를 전달할 수 있는 방법은 없을까?")
     void 객체_자체로_의미를_전달할_수_있는_방법은_없을까() {
         class Menu {
-            private final List<String> menuItems;
+//            private final List<String> menuItems;
+            private final Set<String> menuItems;
 
             // TODO: 객체 자체로 의미를 전달할 수 있도록 코드를 작성해보세요.
-            public Menu(final List<String> menuItems) {
-                if (menuItems.size() != menuItems.stream().distinct().count()) {
-                    throw new IllegalArgumentException("중복된 메뉴가 있습니다.");
-                }
-
+//            public Menu(final List<String> menuItems) {
+//                if (menuItems.size() != menuItems.stream().distinct().count()) {
+//                    throw new IllegalArgumentException("중복된 메뉴가 있습니다.");
+//                }
+//
+//                this.menuItems = menuItems;
+//            }
+            public Menu(final Set<String> menuItems) {
                 this.menuItems = menuItems;
             }
+
         }
 
-        assertThatThrownBy(() -> {
-            new Menu(List.of("쌈밥", "김치찌개", "쌈밥", "비빔밥"));
-        }).hasMessage("중복된 메뉴가 있습니다.");
+//        assertThatThrownBy(() -> {
+//            new Menu(Set.of("쌈밥", "김치찌개", "쌈밥", "비빔밥"));
+//        }).hasMessage("중복된 메뉴가 있습니다.");
+        assertThatCode(() -> {
+            new Menu(Set.of("쌈밥", "김치찌개", "비빔밥"));
+        }).doesNotThrowAnyException();
     }
 
     /**
@@ -771,12 +926,13 @@ public class ReadableCodeTest {
 
             public int getPrice(final String menuName) {
                 // TODO: API에 매몰되어 과하게 사용하여 생긴 코드입니다. 간단한 코드로 리팩토링해보세요.
-                return menu.entrySet()
-                        .stream()
-                        .filter(e -> e.getKey().equals(menuName))
-                        .map(Map.Entry::getValue)
-                        .findFirst()
-                        .orElse(0);
+//                return menu.entrySet()
+//                        .stream()
+//                        .filter(e -> e.getKey().equals(menuName))
+//                        .map(Map.Entry::getValue)
+//                        .findFirst()
+//                        .orElse(0);
+                return menu.getOrDefault(menuName, 0);
             }
         }
         final var menu = new Menu(Map.of(
